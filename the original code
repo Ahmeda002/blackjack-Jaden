@@ -1,0 +1,176 @@
+import random
+suits = ['Hearts', 'Diamonds', 'Clubs', 'Spades']
+ranks = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'Jack', 'Queen', 'King', 'Ace']
+
+deck = []
+
+for suit in suits:
+    for rank in ranks:
+        deck.append(f'{rank} of {suit}')
+
+random.shuffle(deck) 
+playerhand=[]
+dealerhand=[]
+balance=1000
+
+#NumPlayers=int(input("welcome to a game of balckjack how many players are at the table from 1-6:"))
+
+
+
+def wagerhand():
+    global balance
+    while True:
+        wager=int(input("How much do you want to wager min 10: "))
+        if wager>=10 and wager<= balance:
+            #balance -= wager
+            return wager
+        print("Min wager is 10")
+
+
+def dealcard(turn):
+    card=random.choice(deck)
+    turn.append(card)
+    deck.remove(card)
+
+
+def countcards(hand):
+    value = 0
+    has_ace = False
+
+    for card in hand:
+        rank = card.split()[0]
+
+        if rank.isdigit():
+            value += int(rank)
+        elif rank in ['Jack', 'Queen', 'King']:
+            value += 10
+        elif rank == 'Ace':
+            has_ace = True
+            value += 11
+
+    if has_ace and value > 21:
+        value -= 10
+
+    return value 
+
+def insurance(playerhand):
+    global balance
+    balance -= wager *.5 
+
+def checkwinner(playerhand,dealerhand):
+    global balance
+    playervalue=countcards(playerhand)
+    dealervalue=countcards(dealerhand)
+    if dealervalue>21:
+        print(f"Congragulatioins you win Your hand was : {playerhand}, Dealer's hand: {dealerhand})")
+        balance += wager*2
+    elif playervalue==21:
+        print(f"BLACKJACKKK Your hand was : {playerhand}, Dealer's hand: {dealerhand})")
+        balance += wager
+    elif playervalue > 21:
+        print(f"better luck next time Your hand was : {playerhand}, Dealer's hand: {dealerhand})") 
+        balance-=wager 
+    elif  playervalue < dealervalue :
+        print(f"better luck next time Your hand was : {playerhand}, Dealer's hand: {dealerhand})") 
+        balance-=wager 
+    elif playervalue>dealervalue and playervalue < 21 :
+        print(f"Congratulations you win Your hand was : {playerhand}, Dealer's hand: {dealerhand})")
+        balance += wager*2 
+    else:
+        print(f"sorry you push Your hand was : {playerhand}, Dealer's hand: {dealerhand})")
+
+    return balance
+
+
+def bonuscheck(playerhand):
+    global balance
+    if sorted(playerhand)==["J","J"]  or sorted(playerhand)==["K","K"] or sorted(playerhand)==["Q","Q"]:
+        balance= balance + howmuchbonus*5
+        return balance
+    else:
+        balance -= howmuchbonus
+        return balance 
+    
+
+
+print(f"Hello welcome to a game of blackjack your balance is {balance}")
+playerActive=True
+while playerActive:
+    checkforbonus=int(input("do you want the bonus bet: 1 for yes , 2 for no:"))
+    #if checkforbonus==1:
+     #   howmuchbonus=int(input("How much from 1-5"))
+        #bonuscheck(playerhand)
+      #  print(f"your balance is {balance}")
+    #if checkforbonus==2:
+     # print("NO problem Goodluck")  
+    
+    wager=wagerhand() 
+    #print (f"your new balance is {playerbalance}")
+    playerhand.clear()
+    dealerhand.clear()
+    for card in range(2):
+        dealcard(playerhand)
+        dealcard(dealerhand)
+    
+    if checkforbonus==1:
+        howmuchbonus=int(input("How much is your bonus from $1-5: "))
+        bonuscheck(playerhand)
+        print(f"your balance is {balance}")
+    if checkforbonus==2:
+      print("NO problem Goodluck")  
+    #if checkforbonus==1:
+     #   bonus=bonuscheck(wager)
+      #  balance += bonuscheck(wager)
+    #if checkforbonus==2:
+     #
+     #   print("NO problem Goodluck")     
+
+    print(f"Your hand: {playerhand}, Dealer's hand: {dealerhand[:1]} (one card hidden)")
+    playervalue=countcards(playerhand)
+    dealervalue=countcards(dealerhand)
+    if "Ace" in dealerhand[0]:
+        askinsurance=int(input("do you want to add insurance to your bet: 1 for yes , 2 for no:"))
+        if askinsurance==1:
+            print(" you have choose insurance")
+            insurance(balance)
+        elif askinsurance==2:
+            print("You have opted out of insurance good luck")
+        else:
+            print("PLease choose 1 or 2")
+            askinsurance=input("do you want to add insurance to your bet: 1 for yes , 2 for no:")
+    else:
+        print("Insurance is  not available")
+    while countcards(dealerhand)<17:
+        dealcard(dealerhand)
+        dealervalue = countcards(dealerhand)
+    while countcards(playerhand) <21:
+        playervalue=countcards(playerhand)
+        print(f' your total is {playervalue}')
+        doyoupull=int(input("do you want to pick a card or stay 1 to pick a card 2 to stay "))
+        if doyoupull==1:
+            dealcard(playerhand)
+            #total=countcards(playerhand)
+            print(f"Your hand: {playerhand}, Dealer's hand: {dealerhand[:1]} (one card hidden)")
+        elif doyoupull==2:
+            break
+        if countcards(playerhand) > 21:
+            print("You've gone over 21! You lose.")
+            #balance -= wager 
+            break 
+
+
+    if playervalue <= 21:
+        balance = checkwinner(playerhand, dealerhand)
+
+  
+    print(f' your total points is {playervalue} dealer points is {dealervalue} your new balance is {balance}')
+    if balance <=0:
+        print ("game over you are out of money")
+        break
+
+
+
+
+    
+
+
